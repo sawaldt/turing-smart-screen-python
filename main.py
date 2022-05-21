@@ -251,6 +251,8 @@ if __name__ == "__main__":
             cpucolor = ORANGECOLOR
         elif cpuperc >= 25:
             cpucolor = YELLOWCOLOR
+        else:
+            cpucolor = GREENCOLOR
             
         if memperc >= 75:
             memcolor = REDCOLOR
@@ -258,6 +260,8 @@ if __name__ == "__main__":
             memcolor = ORANGECOLOR
         elif memperc >= 25:
             memcolor = YELLOWCOLOR
+        else:
+            memcolor = GREENCOLOR
         
         DisplayText(lcd_comm, cpupercfixed, 5, 150,
                 font="roboto/RobotoMono-Regular.ttf",

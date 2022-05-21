@@ -19,6 +19,14 @@ COM_PORT = "COM3"
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 480
 
+GREENCOLOR = (163,169,72)
+YELLOWCOLOR = (237,185,46)
+ORANGECOLOR = (248,89,49)
+REDCOLOR = (206,24,54)
+        
+cpucolor = GREENCOLOR
+memcolor = GREENCOLOR
+
 
 class Command:
     RESET = 101
@@ -207,14 +215,6 @@ if __name__ == "__main__":
     # Display the current time and some progress bars as fast as possible
     bar_value = 0
     while not stop:
-        greencolor = (163,169,72)
-        yellowcolor = (237,185,46)
-        orangecolor = (248,89,49)
-        redcolor = (206,24,54)
-        
-        cpucolor = greencolor
-        memcolor = greencolor
-        
         cpuperc = psutil.cpu_percent(1)
         memperc = psutil.virtual_memory()[2]
         
@@ -246,18 +246,18 @@ if __name__ == "__main__":
                     background_image="res/example2.png")
         
         if cpuperc >= 75:
-            cpucolor = redcolor
+            cpucolor = REDCOLOR
         elif cpuperc >= 50:
-            cpucolor = orangecolor
+            cpucolor = ORANGECOLOR
         elif cpuperc >= 25:
-            cpucolor = yellowcolor
+            cpucolor = YELLOWCOLOR
             
         if memperc >= 75:
-            memcolor = redcolor
+            memcolor = REDCOLOR
         elif memperc >= 50:
-            memcolor = orangecolor
+            memcolor = ORANGECOLOR
         elif memperc >= 25:
-            memcolor = yellowcolor
+            memcolor = YELLOWCOLOR
         
         DisplayText(lcd_comm, cpupercfixed, 5, 150,
                 font="roboto/RobotoMono-Regular.ttf",

@@ -10,10 +10,11 @@ from time import sleep
 
 import serial  # Install pyserial : pip install pyserial
 from PIL import Image, ImageDraw, ImageFont  # Install PIL or Pillow
+import psutil
 
 # Set your COM port e.g. COM3 for Windows, /dev/ttyACM0 for Linux...
-COM_PORT = "/dev/ttyACM0"
-# COM_PORT = "COM5"
+# COM_PORT = "/dev/ttyACM0"
+COM_PORT = "COM3"
 
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 480
@@ -99,7 +100,7 @@ def DisplayBitmap(ser: serial.Serial, bitmap_path: str, x=0, y=0):
 
 
 def DisplayText(ser: serial.Serial, text: str, x=0, y=0,
-                font="roboto/Roboto-Regular.ttf",
+                font="roboto/RobotoMono-Regular.ttf",
                 font_size=20,
                 font_color=(0, 0, 0),
                 background_color=(255, 255, 255),
@@ -185,57 +186,108 @@ if __name__ == "__main__":
 
     # Clear screen (blank)
     Clear(lcd_comm)
+    # Reset(lcd_comm)
 
     # Set brightness to max value
-    SetBrightness(lcd_comm, 0)
+    SetBrightness(lcd_comm, 240)
 
     # Display sample picture
-    DisplayBitmap(lcd_comm, "res/example.png")
+    DisplayBitmap(lcd_comm, "res/example2.png")
 
     # Display sample text
-    DisplayText(lcd_comm, "Basic text", 50, 100)
-
-    # Display custom text with solid background
-    DisplayText(lcd_comm, "Custom italic text", 5, 150,
-                font="roboto/Roboto-Italic.ttf",
-                font_size=30,
-                font_color=(0, 0, 255),
-                background_color=(255, 255, 0))
+    # DisplayText(lcd_comm, "Basic text", 50, 100)
 
     # Display custom text with transparent background
-    DisplayText(lcd_comm, "Transparent bold text", 5, 300,
-                font="geforce/GeForce-Bold.ttf",
-                font_size=30,
-                font_color=(255, 255, 255),
-                background_image="res/example.png")
-
-    # Display text that overflows
-    DisplayText(lcd_comm, "Text overflow!", 5, 430,
-                font="roboto/Roboto-Bold.ttf",
-                font_size=60,
-                font_color=(255, 255, 255),
-                background_image="res/example.png")
+    DisplayText(lcd_comm, "System Usage", 5, 100,
+                font="roboto/RobotoMono-Bold.ttf",
+                font_size=42,
+                font_color=(0,140,158),
+                background_color=(0, 0, 0))
 
     # Display the current time and some progress bars as fast as possible
     bar_value = 0
     while not stop:
-        DisplayText(lcd_comm, str(datetime.now().time()), 160, 2,
-                    font="roboto/Roboto-Bold.ttf",
+        greencolor = (163,169,72)
+        yellowcolor = (237,185,46)
+        orangecolor = (248,89,49)
+        redcolor = (206,24,54)
+        
+        cpucolor = greencolor
+        memcolor = greencolor
+        
+        cpuperc = psutil.cpu_percent(1)
+        memperc = psutil.virtual_memory()[2]
+        
+        cpupercfixed = str(int(cpuperc))
+        mempercfixed = str(int(memperc))
+        
+        if (len(cpupercfixed)) == 1:
+            dblspace = '  '
+            cpupercfixed = dblspace + cpupercfixed
+        if (len(cpupercfixed)) == 2:
+            dblspace = ' '
+            cpupercfixed = dblspace + cpupercfixed
+        cpupercfixed = 'CPU:' + cpupercfixed
+        cpupercfixed += '%'
+        
+        if (len(mempercfixed)) == 1:
+            dblspace = '  '
+            mempercfixed = dblspace + mempercfixed
+        if (len(mempercfixed)) == 2:
+            dblspace = ' '
+            mempercfixed = dblspace + mempercfixed
+        mempercfixed = 'RAM:' + mempercfixed
+        mempercfixed += '%'
+        
+        DisplayText(lcd_comm, str(datetime.now().time()), 80, 2,
+                    font="roboto/RobotoMono-Bold.ttf",
                     font_size=20,
-                    font_color=(255, 0, 0),
-                    background_image="res/example.png")
+                    font_color=(249,242,231),
+                    background_image="res/example2.png")
+        
+        if cpuperc >= 75:
+            cpucolor = redcolor
+        elif cpuperc >= 50:
+            cpucolor = orangecolor
+        elif cpuperc >= 25:
+            cpucolor = yellowcolor
+            
+        if memperc >= 75:
+            memcolor = redcolor
+        elif memperc >= 50:
+            memcolor = orangecolor
+        elif memperc >= 25:
+            memcolor = yellowcolor
+        
+        DisplayText(lcd_comm, cpupercfixed, 5, 150,
+                font="roboto/RobotoMono-Regular.ttf",
+                font_size=40,
+                font_color=(249,242,231),
+                background_color=(0, 0, 0))
+        
+        DisplayText(lcd_comm, mempercfixed, 5, 200,
+                font="roboto/RobotoMono-Regular.ttf",
+                font_size=40,
+                font_color=(249,242,231),
+                background_color=(0, 0, 0))
 
         DisplayProgressBar(lcd_comm, 10, 40,
                            width=140, height=30,
-                           min_value=0, max_value=100, value=bar_value,
-                           bar_color=(255, 255, 0), bar_outline=True,
-                           background_image="res/example.png")
-
+                           min_value=0, max_value=100, value=int(cpuperc),
+                           bar_color=cpucolor, bar_outline=True,
+                           background_image="res/example2.png")
+        
         DisplayProgressBar(lcd_comm, 160, 40,
                            width=140, height=30,
-                           min_value=0, max_value=19, value=bar_value % 20,
-                           bar_color=(0, 255, 0), bar_outline=False,
-                           background_image="res/example.png")
+                           min_value=0, max_value=100, value=int(memperc),
+                           bar_color=memcolor, bar_outline=True,
+                           background_image="res/example2.png")
+
+        # DisplayProgressBar(lcd_comm, 160, 40,
+        #                    width=140, height=30,
+        #                    min_value=0, max_value=19, value=bar_value % 20,
+        #                    bar_color=(0, 255, 0), bar_outline=False,
+        #                    background_image="res/example2.png")
 
         bar_value = (bar_value + 2) % 101
 
